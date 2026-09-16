@@ -21,5 +21,8 @@ Set up an availability watch for a restaurant using the table-watcher skill.
    - Run `opentable status`; if not connected, share the connect link.
    - Dry-run `python3 scripts/watch.py --config scripts/config.json`.
    - Schedule hourly runs (cron or equivalent) and confirm the schedule.
-3. Report back what is being watched (restaurant, party size, dates, window,
+3. Mention the extras: `python3 scripts/watch.py --scout` for a weekly
+   full-range availability report, `--status` for queue progress, and
+   `--cancel --rid RID --confirmation-id ID` to cancel a reservation.
+4. Report back what is being watched (restaurant, party size, dates, window,
    mode, check frequency) in plain language.
