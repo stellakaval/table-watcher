@@ -1,1 +1,17 @@
-{"author":{"name":"YOUR NAME"},"description":"Watch OpenTable restaurants for hard-to-get reservations. Polls availability on a schedule, matches your time window and party size, notifies on hits, and can auto-book with explicit opt-in.","keywords":["opentable","reservations","restaurants","watcher","booking"],"license":"MIT","name":"table-watcher","repository":"https://github.com/YOUR-USERNAME/table-watcher","version":"0.1.0"}
+{
+  "author": {
+    "name": "Stella Kaval"
+  },
+  "description": "Watch OpenTable restaurants for hard-to-get reservations. Polls availability on a schedule, matches your time window and party size, notifies on hits, and can auto-book with explicit opt-in.",
+  "keywords": [
+    "opentable",
+    "reservations",
+    "restaurants",
+    "watcher",
+    "booking"
+  ],
+  "license": "MIT",
+  "name": "table-watcher",
+  "repository": "https://github.com/stellakaval/table-watcher",
+  "version": "0.1.0"
+}
