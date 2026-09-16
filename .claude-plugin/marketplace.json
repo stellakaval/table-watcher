@@ -1,1 +1,13 @@
-{"name":"table-watcher","owner":{"name":"YOUR NAME"},"plugins":[{"description":"Watch OpenTable restaurants for hard-to-get reservations; notify or auto-book on hits.","name":"table-watcher","source":"./"}]}
+{
+  "name": "table-watcher",
+  "owner": {
+    "name": "Stella Kaval"
+  },
+  "plugins": [
+    {
+      "description": "Watch OpenTable restaurants for hard-to-get reservations; notify or auto-book on hits.",
+      "name": "table-watcher",
+      "source": "./"
+    }
+  ]
+}
