@@ -1,0 +1,18 @@
+# Personal config — never commit contact details
+scripts/config.json
+config.json
+
+# Runtime state and logs
+state/
+logs/
+*.log
+*.jsonl
+
+# Python
+__pycache__/
+*.pyc
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
