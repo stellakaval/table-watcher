@@ -5,6 +5,37 @@ reservations. It polls availability on a schedule, matches your time window and
 party size, and notifies you on a hit — or books the table automatically if you
 explicitly opt in.
 
+## Features
+
+- **Batch watching** — each run checks a small sequential batch and advances a
+  rotating pointer, so the full (restaurant × date × party size) space is swept
+  over successive hourly runs. One provider call at a time, paced, with
+  automatic backoff on rate limits.
+- **Auto-book (opt-in)** — books at most **one** table per run: the
+  highest-priority hit (your restaurant ranking, then earliest date/time).
+  Lower-priority hits notify only, so you never double-book yourself.
+- **Scout reports** — `--scout` sweeps the entire range and writes a Markdown
+  availability report (`logs/scout_YYYY-MM-DD.md`): which dates have tables,
+  per restaurant and party size. Run it weekly for discovery.
+- **Notifications that reach you** — hits fan out to a shell command, an
+  [ntfy.sh](https://ntfy.sh) topic (push alerts, no account), and/or a JSON
+  webhook (Discord, Slack, Zapier, your own service).
+- **Operational commands** — `--status` shows queue progress and last hits;
+  `--cancel` cancels a reservation by confirmation ID.
+- **Provider architecture** — OpenTable ships today; Resy/Tock plug into the
+  same `check()`/`book()` interface when their CLIs exist.
+
+## How it compares
+
+| | table-watcher | table-scout | opentable-mcp | resy-notifier |
+|---|---|---|---|---|
+| Install | Muse Code plugin (`/plugins`) | manual script + launchd | MCP server | manual script |
+| Platforms | OpenTable (Resy/Tock-ready) | Resy, OpenTable, Tock | OpenTable | Resy |
+| Auto-book | yes, one best hit per run | no (alerts only) | via MCP tools | no |
+| Discovery report | yes (`--scout`) | yes (weekly email) | no | no |
+| Notifications | shell, ntfy, webhook | email | client-dependent | ntfy |
+| Cancel reservations | yes (`--cancel`) | no | via MCP tools | no |
+
 ## How it works
 
 1. You configure the restaurants (by OpenTable `rid`), party sizes, date range,
@@ -12,8 +43,8 @@ explicitly opt in.
 2. `scripts/watch.py` checks a small batch of (restaurant × date × party size)
    combos each run via the `opentable` CLI, keeping a rotating pointer in
    `state/` so successive runs sweep the whole space.
-3. On a hit it either notifies you (default) or attempts a booking
-   (`auto_book: true`, opt-in only).
+3. On a hit it notifies across every configured channel (default), or attempts
+   a booking (`auto_book: true`, opt-in only).
 
 ## Install
 
@@ -50,6 +81,12 @@ python3 scripts/watch.py --config scripts/config.json
 # 4. Schedule it (hourly is a good default)
 crontab -e
 # 0 * * * * /usr/bin/python3 /path/to/table-watcher/scripts/watch.py --config /path/to/table-watcher/scripts/config.json
+
+# 5. Optional: weekly scout report (Monday mornings)
+# 0 9 * * 1 /usr/bin/python3 /path/to/table-watcher/scripts/watch.py --config /path/to/table-watcher/scripts/config.json --scout
+
+# 6. Check status anytime
+python3 scripts/watch.py --config scripts/config.json --status
 ```
 
 Find a restaurant's `rid` with:
@@ -62,13 +99,16 @@ opentable lookup-rid --name "House of Prime Rib" --city "San Francisco"
 
 `auto_book` defaults to `false` (notify-only). If you set it to `true`:
 
-- The watcher will book the **first** in-window slot it finds, no further
-  confirmation. Only enable it for watches where any matching slot is
-  acceptable to you.
+- The watcher will book **at most one table per run** — the best hit, chosen by
+  your restaurant priority first, then earliest date/time. Lower-priority hits
+  notify only, so one run can never double-book you. No further confirmation.
+  Only enable it for watches where any matching slot is acceptable to you.
 - You must fill in `diner` (first name, last name, email, phone) in
   `config.json`.
 - A booking only counts when the script reports `confirmed`. Anything else —
   errors, empty output, timeouts — is reported as a miss, never as a booking.
+- A confirmed booking fires the notification channels too (so your phone still
+  buzzes with the details).
 
 ## Recording a good demo
 
