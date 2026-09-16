@@ -45,6 +45,42 @@ Backed by `scripts/watch.py`, which drives the `opentable` CLI.
    `python3 <repo>/scripts/watch.py --config <repo>/scripts/config.json`.
    Each run checks a small batch and advances a rotating pointer, so the full
    (restaurant × date × party size) space is swept over successive runs.
+   Optionally schedule a weekly `--scout` run for a full-range report.
+
+## Modes (`scripts/watch.py`)
+
+- **Default (batch):** one small sequential batch per run; advances the rotating
+  pointer. Cron-friendly. Books at most ONE table per run in auto-book mode:
+  the highest-priority hit (restaurant priority, then earliest date/time).
+  Lower-priority hits notify only.
+- **`--scout`:** sweeps the ENTIRE queue and writes a Markdown availability
+  report to `logs/scout_YYYY-MM-DD.md` (plus JSON) — which dates have
+  in-window tables, per restaurant and party size. Good as a weekly discovery
+  run (e.g. Monday mornings).
+- **`--status`:** prints queue progress (% swept), last run summary, last hits,
+  rate-limit state, and far-out skips. Read-only.
+- **`--cancel --rid RID --confirmation-id ID`:** cancels a reservation. Prints
+  the result; only counts when the CLI confirms the cancellation.
+
+## Notifications
+
+Hits (and confirmed bookings) fan out across every configured channel:
+
+- `notify_command`: a shell command; `{restaurant}`, `{date}`, `{time}`,
+  `{party_size}`, `{rid}` are substituted.
+- `notify_ntfy_topic`: posts to `https://ntfy.sh/<topic>` — no account needed,
+  install the ntfy app to get push alerts anywhere.
+- `notify_webhook_url`: POSTs a JSON event
+  (`table_watcher.hit` / `table_watcher.booking`) — wire it to Discord,
+  Slack, Zapier, or your own service.
+
+## Provider model
+
+Availability checking and booking go through a provider object; only
+`"opentable"` ships (it wraps the `opentable` CLI). Each restaurant entry
+accepts an optional `"provider"` key (default `"opentable"`). A Resy/Tock
+provider is a class with the same `check()`/`book()` interface, registered in
+`PROVIDERS` in `watch.py` once their CLI or API exists in the runtime.
 
 ## On a hit
 
